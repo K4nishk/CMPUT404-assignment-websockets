@@ -22,6 +22,7 @@
     "/>
     <script src="json2.js"></script>
   </head> 
+  <!-- can change the below line to change the background -->
   <body bgcolor="white" height="100%" width="100%"> 
     <div id="debug"></div>
     <canvas id="c" width="100%" height="100%" style="-webkit-tap-highlight-color: transparent;"></canvas> 
@@ -73,6 +74,7 @@ function clearFrame() {
     with(context) {
 	moveTo(0,0);
 	fillStyle = "#000";
+    // fillStyle = "transparent";
 	fillRect(0,0,W,H);
     }
 
@@ -125,6 +127,11 @@ function addEntity(entity, data) {
     world[entity] = data;
     drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
+
+    var msg = {}
+    msg[entity] = data
+    // console.log(msg)
+    socket.send( JSON.stringify(msg) )
 }
 var counter = 0;
 function addEntityWithoutName(data) {
@@ -246,6 +253,8 @@ mouse.mousedraggers.push(function(x,y,clicked,e) {
 
 function update() {
     drawFrame();
+
+    
 }
 
 
