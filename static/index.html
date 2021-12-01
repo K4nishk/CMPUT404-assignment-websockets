@@ -253,16 +253,44 @@ mouse.mousedraggers.push(function(x,y,clicked,e) {
 
 function update() {
     drawFrame();
-
-    
 }
 
+
+function sendJSONXMLHTTPRequest(url, objects, callback) {
+    if (objects == null) {
+        // fetch the url
+        return fetch(url).then(result => result.json()).then(body => callback(body));
+    }
+    else {
+        return fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(objects),
+            headers: new Headers({
+                "Content-Type": "application/json",
+                "Accept":"application/json"
+            }),
+        });
+    }
+}
+
+function setNewWorld(newWorld) {
+    for (let i in newWorld) {
+        world[i] = newWorld[i];
+    }
+    drawNextFrame();
+}
+
+function fetchAndSetWorld(url, callback) {
+    fetch(url).then(response => response.json()).then(data => callback(data));
+}
 
 function wsSetup() {
     var url = "ws://"+host+"/subscribe";   
     socket = new WebSocket(url);
     socket.onopen = function() {
         //XXX: TODO What are you going to do here?
+        // Get the last updated world and set it
+        fetchAndSetWorld("/world", setNewWorld);
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
@@ -270,7 +298,9 @@ function wsSetup() {
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
-            //XXX: TODO What are you going to do here?            
+            //XXX: TODO What are you going to do here?  
+            // got some data set it into the world
+            setNewWorld(JSON.parse(msg.data))          
         } catch (e) {
             alert("socket on message: " + e);
         }
